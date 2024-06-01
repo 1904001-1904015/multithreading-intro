@@ -25,17 +25,15 @@ public class Main {
             bank.deposit();
         });
         depositThread.start();
-        System.out.println("coompleted");
+        System.out.println("completed");
 
         System.out.printf("Initializing withdraw systen....");
         Thread withdrawThread = new Thread(() -> {
             bank.withdraw();
         });
         withdrawThread.start();
-        System.out.println("coompleted");
+        System.out.println("completed");
 
-
-        System.out.println("coompleted");
 
     }
 }

@@ -1,3 +1,5 @@
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class Bank {
     String accountNumber;
@@ -5,6 +7,8 @@ public class Bank {
     OperationsQueue operationsQueue;
 
     int balance = 0;
+
+    private final Lock balanceLock = new ReentrantLock();
 
     public Bank(String accountNumber, OperationsQueue operationsQueue) {
         this.accountNumber = accountNumber;
@@ -17,16 +21,20 @@ public class Bank {
         // for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.
         while (true) {
             int amount = operationsQueue.getNextItem();
-            if(amount == -9999) {
+            if (amount == -9999) {
                 break;
             }
-            if (amount>0) {
-                balance =  balance + amount;
-                System.out.println("Deposited: " + amount + " Balance: " + balance);
-            }
-            else{
+            if (amount > 0) {
+                balanceLock.lock();
+                try {
+                    balance = balance + amount;
+                    System.out.println("Deposited: " + amount + " Balance: " + balance);
+                } finally {
+                    balanceLock.unlock();
+                }
+            } else {
                 operationsQueue.add(amount);
-                System.out.println("operation added back "+amount);
+                System.out.println("operation added back " + amount);
             }
 
         }
@@ -36,23 +44,26 @@ public class Bank {
     public void withdraw() {
         while (true) {
             int amount = operationsQueue.getNextItem();
-            if(amount == -9999) {
+            if (amount == -9999) {
                 break;
             }
 
-            if(balance+amount<0){
-
-                System.out.println("Not enough balance to deposite "+amount);
+            if (balance + amount < 0) {
+                System.out.println("Not enough balance to withdraw " + amount);
                 continue;
             }
 
-            if (amount<0) {
-                balance =  balance + amount;
-                System.out.println("Withdrawn: " + amount + " Balance: " + balance);
-            }
-            else{
+            if (amount < 0) {
+                balanceLock.lock();
+                try {
+                    balance = balance + amount;
+                    System.out.println("Withdrawn: " + amount + " Balance: " + balance);
+                } finally {
+                    balanceLock.unlock();
+                }
+            } else {
                 operationsQueue.add(amount);
-                System.out.println("operation added back "+amount);
+                System.out.println("operation added back " + amount);
             }
 
         }
